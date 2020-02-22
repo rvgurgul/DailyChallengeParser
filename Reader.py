@@ -7,9 +7,12 @@ root = "./Datafiles"
 results = {}
 res_re = re.compile(r'''\*\*(?P<sniper>[^*]+)\*\*\s+Day #(?P<day>[\d]+)\s+_Level:_ \*\*(?P<level>[\d])(\s\()?(?P<delta>[+\-\d]+)?(?P<bonus>(bonus))?\)?[\s\S]*\*\* _Score:_ \*\*(?P<score>[\d])/8\*\* _Time:_ \*\*((?P<m>[\d]+)m)?\s?(?P<s>[\d]+)s\*\*\n\|\|(\*\*Won against:\*\*\s(?P<wins>(.*?)))?(\s\s)?(\*\*Lost to:\*\*\s(?P<losses>(.*?)))?\|\|''')
 
+# One of Opi's lvl 7 8/8 scores is invalid/illegitimate
+
 
 def coherency_check(mtchs):
     if mtchs["day"] < "61":
+        print(mtchs["day"], "< 61")
         return False
     tot = len(mtchs["losses"]) + len(mtchs["wins"])
     if tot != 8:
@@ -48,9 +51,8 @@ for filename in os.listdir(root):
                 matches["s"] = int(matches["s"])
                 matches["wins"] = matches["wins"].split(", ") if matches["wins"] is not None else []
                 matches["losses"] = matches["losses"].split(", ") if matches["losses"] is not None else []
-                print(matches)
+                # print(matches)
 
-                # results["day"]["level"]
                 if coherency_check(matches):
                     day = matches["day"]
                     lvl = matches["level"]
@@ -62,7 +64,10 @@ for filename in os.listdir(root):
                             results[day][lvl] = [matches]
                     else:
                         results[day] = {}
+                else:
+                    print("incoherent:", msg)
 
     with open("DailyChallengePools/challenge_results.json", 'w') as outfile:
         json.dump(results, outfile)
         outfile.close()
+
